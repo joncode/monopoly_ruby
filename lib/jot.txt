@@ -1,0 +1,65 @@
+#  have an array of all property information
+# looks like this
+def initialize(name, color, square, cost, house_price, rent, house2, house3, house4, hotel, house1=nil)
+  @name   = name
+  @color  = color
+  @square = square
+  @owner  = :bank
+  @monopolized = false
+  @cost        = cost
+  @mortgaged   = false
+  @mortgage_amount = cost/2
+  @house_price = house_price
+  @buildings   = 0 
+  @rent        = rent
+  @house1_rent = house1 || rent*5
+  @house2_rent = house2
+  @house3_rent = house3
+  @house4_rent = house4
+  @hotel_rent  = hotel
+  @landed_on = 0
+  @income = 0
+  
+end
+
+name, color, square, cost, houseprice, rent,2,3,4,hotel, 1
+['Mediterranean', 'brown', 1, 60, 50, 2, 30,  90, 160, 250]
+['Baltic',        'brown', 3, 60, 50, 4, 60, 180, 320, 450]
+['Oriental',      'baby',  6,100, 50, 6, 90, 270, 400, 550]
+['Vermont',       'baby',  8,100, 50, 6, 90, 270, 400, 550]
+['Connecticut',   'baby',  9,120, 50, 8,100, 300, 450, 600]
+['Pennsylvania', 'green', 34,320,200,28,450,1000,1200,1400,150]
+['No Carolina',  'green', 32,300,200,26,390, 900,1100,1275]
+['Pacific',      'green', 31,300,200,26,390, 900,1100,1275]
+['Illinois',       'red', 24,240,150,20,300, 750, 925,1100]
+['Indiana',        'red', 23,220,150,18,250, 700, 875,1050]
+['Kentucky',       'red', 21,220,150,18,250, 700, 875,1050]
+['St. James',   'orange', 16,180,100,14,200, 550,750,950]
+['Tenneessee',  'orange', 18,180,100,14,200, 550,750,950]
+['New York',    'orange', 19,200,100,16,220, 600,800,100]
+['St Charles',  'purple', 11,140,100,10,150, 450,625,750]
+['States' ,     'purple', 13,140,100,10,150, 450,625,750]
+['Virginia',    'purple', 14,160,100,12,180, 500,700,900]
+['Park Place',    'blue', 37,350,200,35,500,1100,1300,1500]
+['Boardwalk',     'blue', 39,400,200,50,600,1400,1700,2000,200]
+['Atlantic',    'yellow', 26,260,150,22,330,800,975,1150]
+['Vetnor',      'yellow', 27,260,150,22,330,800,975,1150]
+['Marvin Gardens', 'yellow', 29, 280, 150, 24, 360, 850, 1025, 1200]
+
+
+Utility
+name, cost
+
+'Electric Company', 150
+'Water Works', 150
+
+
+Railroad
+name
+'Reading Railroad', 
+'Pennsylvania Railroad',
+'B & O Railroad'
+'Short Line Railroad'
+
+
+

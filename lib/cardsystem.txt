@@ -1,0 +1,14 @@
+cards must be shuffled at the beginning of the game and if the cards run out
+
+cards are in an array 
+
+######################
+
+
+shuffled = []
+total = array.count
+until total == 0
+   card = rand(total)
+   shuffled << array.slice!(card)
+   total -= 1
+end

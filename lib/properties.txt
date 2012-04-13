@@ -1,0 +1,7 @@
+roll program 
+
+if you roll a double you roll again , therefore game.next_turn is not run
+  doubles is incremented instead
+  if you doubles 3x you go to jail
+
+if you are in jail you must roll doubles to get out or post bail

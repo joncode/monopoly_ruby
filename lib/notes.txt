@@ -1,0 +1,149 @@
+board is an array of 2 spots arrays 
+spot 1 is a type
+   property, utility, railroad, chance, chest, go, jail, gotojail, parking, tax
+spot 2 is an object specific to each
+
+####################
+
+choice_bar(player)           ***************
+
+def action
+   case type
+   when property
+      getrent(player,object, type)
+   when utility
+      if object.monopolized
+         mulitplier = 10
+      else
+         multiplier = 4
+      end
+      object.rent = roll * multiplier
+      getrent(player, object, type)
+   when railroad
+      getrent(player, object, type)
+   when chance,    chest
+      playcard(player, type)    ***********************
+   when go
+      getsalary(player)
+   when jail
+      puts "#player.name is just visting"
+   when gotojail
+      gotojail_function(player)
+      jail = true   # use this to remove end of turn manage options
+   when parking
+      puts "#player.name lands on free parking"
+   when tax
+      paytax(player, tax)
+   end
+end
+
+if !jail
+   choice_bar(player)
+end
+
+####################
+
+def getrent(player, object, type)
+   owner = object.owner
+   mortgaged = object.mortgaged
+   if owner == 0
+      buy(player, object, type)
+   elsif owner != player.id
+      if !mortgaged
+         payrent(player, object)
+      end
+   end
+end
+
+def buy(player, object, type)
+   display(object, type)
+   if player.money < object.price
+      puts "You do not have enough money to buy object.name"
+   else
+      puts "Do you want to buy object.name for object.price y/n?"
+      answers = ['y','n']
+      answer = get_y_n(answers)
+      if answer == 'y'
+         player.money = player.money - object.price
+         object.owner = player.id
+      end
+   end
+end
+
+def payrent(player, object)
+   rent = object.rent
+   puts "#player.name has landed on #object.name"
+   puts "#player.name must pay #rent to #object.owner"
+   player.money = player.money - #rent
+   object.owner.money = object.owner.money + #rent
+   if player.money < 0
+      puts "#player.name cannot afford the rent"
+      manage_assets(player)      *************************
+   else
+      puts "#rent paid to #object.owner"
+   end
+end
+
+def display(object, type)
+   case type
+   when property
+      display_property(object)
+   when railroad
+      display_railroad(object)
+   when utility
+      display_utility(object)
+   end
+end
+
+def display_property(object)
+   puts object.color
+   puts object.name
+   puts object.cost , object.rent
+   puts object.house1_rent
+   puts object.house2_rent
+   puts object.house3_rent
+   puts object.house4_rent
+   puts object.hotel_rent
+   puts object.house_price
+   puts object.mortgage_amount
+end
+
+def paytax(player, tax)
+   puts "#player.name pays #tax tax"
+   player.money = player.money - #tax
+end
+
+def getsalary(player)
+   puts "#player.name receives salary of $200"
+   player.money = player.money + 200
+end
+
+def gotojail_function(player)
+   puts "#player.name is going to jail"
+   player.square = 10
+end
+
+def rolldice
+   die1 = rand(6) + 1
+   die2 = rand(6) + 1
+   dice = [die1, die2]
+   roll = die1 + die2
+   return roll
+end
+
+def choice_bar(player)
+   # choosing between rolldice || end turn, trade, manage, log, pause(menu)
+end
+
+def playcard(player, type)
+   # get shuffled card from chest or chance
+end
+
+def manage_assets(player)
+   # allow player to mortgage or trade properties
+end
+
+
+
+
+
