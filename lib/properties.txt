@@ -5,3 +5,30 @@ if you roll a double you roll again , therefore game.next_turn is not run
   if you doubles 3x you go to jail
 
 if you are in jail you must roll doubles to get out or post bail
+
+
+
+turn loop 
+	get_menu
+end
+
+end turn situations
+	normal end turn - no doubles after do_location
+		get_menu w/ end turn
+	normal end turn - doubles rolled when in jail
+		do_location of roll value
+		get_menu w/ end turn
+	abnormal end turn - go_to_jail location, 3rd doubles
+		no get menu , just you are in jail msg
+	in_jail - didnt roll doubles
+		menu with post bail option ??
+	loop re-runs
+		something besides roll was chosen 
+		doubles were rolled when not in jail 
+			@doubles += 1\
+			
+begin turn situations
+	normal begin turn - doubles havent been rolled
+		get_menu w/ roll
+	in_jail begin turn
+		get_menu w/ roll , post, card?   

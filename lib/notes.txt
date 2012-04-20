@@ -147,3 +147,59 @@ end
 
 
 
+# get_menu(player, game)
+#  if in jail display :
+#      menu with roll doubles, post bail , card ? , trade, manage, log , pause
+#  if not in jail display  :   
+#      menu with roll, trade, manage, log, pause
+# check turn results - did u roll doubles, did you end up in jail  ?
+#  if doubles were rolled 
+#      run continue turn method - msg that you get to roll again - upgrade @doubles
+#     get_menu(player, game) - call method in if not jail display
+#  if doubles were not rolled
+#       diplay menu with end turn, trade, manage, log ,a pause
+
+loop is a run where @your_turn gets set to false when the turn comes to an end
+while @your_turn_
+
+
+ask if in jail 
+if no 
+	display normal + menu
+if yes
+	display in jail +  menu
+
+beginning of turn
+are you in jail ?
+	if no - add roll , to normal menu 
+		run normal roll porgram
+	if yes - add roll , post, card? to normal menu
+		run jail roll program
+
+normal roll program
+	are you rolling again ? 
+	if you roll doubles for the first or second time
+	 	@doubles += 1
+		@roll_again = true
+		move_piece
+	if you rolled doubles for the third time
+		go_to_jail
+		@jail = true
+		turn_over no menu
+	if you didnt roll doubles
+		@roll_again = false
+		move_piece
+		add end turn, to normal menu 
+end
+
+move_piece
+	u land on go_to_jail or get go_to_jail card
+		go_to_jail
+		@jail = true
+		turn_over no menu
+	u land anywhere else
+		run_location
+end
+		
+	
+	

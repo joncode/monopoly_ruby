@@ -19,9 +19,9 @@ class Dice
     if die1 == die2
       @doubles += 1
       if @doubles < 3
-        puts "Doubles are rolled !! @doubles = #{@doubles}"
+        puts "Doubles are rolled !!     [ @doubles = #{@doubles}]"
       else
-        puts "Third doubles in a row ... GO TO JAIL! @doubles = #{@doubles}"
+        puts "Third doubles in a row ... GO TO JAIL!       [@doubles = #{@doubles}]"
         @doubles = 0
         player.jail = true
         player.turns_in_jail = 0
@@ -81,7 +81,7 @@ class CardLocation
     @type  = type
     @value = value
     @text  = text
-    @name = type.capitalize
+    @name  = type.capitalize
   end
 end
 
@@ -100,7 +100,7 @@ class Utility
 end
 
 class Railroad
-  attr_accessor  :owner, :rent, :multiplier, :landed_on, :income, :mortgaged
+  attr_accessor  :owner, :rent, :multiplier, :landed_on, :income, :mortgaged, :monopolized
   attr_reader    :base_rent, :name, :cost
   def initialize(name)
     @name        = name
@@ -111,7 +111,8 @@ class Railroad
     @multiplier  = 1                     # variable based on number of owner railroads
     @landed_on   = 0                     # variable
     @income      = 0                     # variable
-    @mortgaged   = false                 # variable
+    @mortgaged   = false
+    @monopolized = false                 # variable
   end
 end
 
@@ -119,10 +120,10 @@ class Player
   attr_accessor :money, :square, :houses, :hotels, :jail, :gooj, :turns_in_jail, :assets
   attr_reader   :id,    :name
   def initialize(cash, number)
-    puts "Player #{number} what is your name ?"
-    print " -> "
-    name = gets.chomp.downcase                        # players now can have the same name , kinda confusing
-    # name = "Player #{number}"
+    # puts "Player #{number} what is your name ?"
+    # print " -> "
+    # name = gets.chomp.downcase                        # players now can have the same name , kinda confusing
+    name = "Player #{number}"
     @id     = number   
     @name   = name.capitalize
     @money  = cash    # variable
@@ -159,7 +160,7 @@ class Monopoly
 
   def initialize
     print "\e[2J\e[f"
-    @board = nil
+    @board = game_board
   end
 
   def game_board
@@ -215,7 +216,6 @@ class Monopoly
       x = i + 1
       @players << Player.new(@start_cash, x)
     end
-    @board  = game_board
     @chance = shuffle_chance
     @chest  = shuffle_chest
     game    = Dice.new(@number_players)
@@ -223,38 +223,50 @@ class Monopoly
     while game_on                              ################# ROLL LOOP  START
       player_index = game.turn
       player   = @players[player_index]
-      begin_turn(player,game)
-      
+      # old code
+      get_menu(player,game, game_on)
       if !player.jail || game.doubles > 0
-        game_on  = end_turn(game_on)
+        get_menu(player,game,true)
       end
       if game.doubles == 0 || player.jail
         game.next_turn
       else
         puts "ROLL AGAIN!"
       end
-      
-      #  end turn 
+      #  end turn - old code
+      # new code
+      if !(player.jail)
+        get_menu(player,game)
+      else 
+        in_jail(player,game)
+      end
       
     end                               ####################  ROLL LOOP END
   end
 
-  def begin_turn(player,game)
-    answers = ['r', 'm']
+  def get_menu(player, game, game_on=true, turn_over=false)
+    answers = turn_over ? ['e'] : ['r']
+    msg     = turn_over ? "End Turn ? " : "You can Roll "
+    answers.concat(['t', 'm', 'l','p', 'q'])
     puts "#{player.name}'s turn. You have -> $#{player.money}"
-    puts "You can Roll , Trade , Manage , Log, Pause "
+    puts "#{msg} , Trade , Manage , Log, Pause, Quit"
     user = get_y_n(answers)
     case user
+    when 'y'
+      game_on = true
+      puts "next player's turn"
     when 'r'
       roll(player, game)
     when 't'
-      puts "trade method needs to be written"
+      trade(player)
     when 'm'
       manage(player, game)
     when 'l'
       puts "log method needs to be written"
     when 'p'
       puts "pause method needs to be written"
+    when 'q'
+      game_on = false
     end
   end
 
@@ -268,6 +280,99 @@ class Monopoly
     end
   end
 
+  def trade(player)
+    if @number_players > 2
+      other_player = which_player(player)
+    else
+      player_index = @players.index(player)      # player_index = player.id - 1
+      other_player = @players.reject { |item| item == player }.pop
+    end
+    display_trade(player, other_player)
+    # put c next to card, number next to property , and add $ for money value 
+    # add lines below the column for the offers  this is offered to X for Y
+    
+  end
+
+  def display_trade(player, other_player)
+    # list your money, gooj cards , assets and trading partner money, gooj cards , assets in 2 columns
+    #     Player 1 Name   |-|    Player  2 Name
+    #       $570          :$:      $230
+    #   Jail Free x 2     :c:   
+    #   ------------------------------------
+    #    Kentucky         :1:   Park Place  !
+    #  (M) Tennessee      :2:  (M) Pennsylvania Railroad   
+    #    Water Works      :3:  Boardwalk   ! 
+    # (M) B & O Railroad  :4:  
+    # (M) Conneticut      :5:
+    puts "      #{player.name}     |-|       #{other_player.name}"
+    puts "      #{player.money}     :$:       #{other_player.money}"
+    puts "      Jail Free x #{player.gooj}     :$:      Jail Free x  #{other_player.gooj}"
+    puts "----------------------------------------------------------"
+    p_ind = 0
+    o_ind = 1
+    msg = []
+    @board.reverse.each do |location|
+      if location.respond_to?(:owner)
+        case location.owner
+        when player
+          text_str   = prep_trade_screen(location)
+          msg[p_ind] = text_str
+          p_ind     += 2
+        when other_player
+          text_str   = prep_trade_screen(location)
+          msg[o_ind] = "#{text_str}\n"
+          o_ind     += 2
+        end
+      end
+    end
+
+    total = msg.count
+    i     = 0
+    num   = 1
+    while i < total
+      msg[i]   = ""  if msg[i].nil?               # ? code before loop that replaces all nils in msg array with "" 
+      msg[i+1] = ""  if msg[i+1].nil?
+      puts "        #{msg[i]}     :#{num}:     #{msg[i+1]}    "
+      num += 1
+      i   += 2
+    end
+    # prompt players in turn to type number to add each property to trade , c for card, and $+number for money
+    # display each offer after choosing each
+    # have 'o' mean offer and then the other player gets the same prompt for their counter offer or accept 
+    
+  end
+
+  def prep_trade_screen(location)
+    mortgage_indicator = "(M)"  if location.mortgaged
+    monopoly_indicator = "!"    if location.monopolized
+    text_str = "#{mortgage_indicator} #{location.name}  #{monopoly_indicator}"
+  end
+  
+  def which_player(player)
+    puts "which player would you like to trade with ?"
+    i = 1
+    answers = []
+    @players.each do |p|
+      if p != player
+        puts " #{i} : p.name"
+        answers << i
+        i += 1
+      end
+    end
+    user_response = get_y_n(answers)
+    i = 1
+    @players.cycle(1) do |p|
+      if p != player
+        if i == user_response 
+          other_player = p 
+        end
+      end
+      break if other_player == p
+      i += 1 
+    end
+    return other_player
+  end
+  
   def manage(player, game)
     i = 01
     answers = ['b']
@@ -287,7 +392,7 @@ class Monopoly
     puts " type a number to see detail on any property or 'b'ack "
     user = get_y_n(answers)
     if user == 'b'
-      begin_turn(player, game)
+      get_menu(player, game)
     else
       user = user.to_i - 1
       location = assets[user]
@@ -384,7 +489,7 @@ class Monopoly
     when 0
       puts "Never landed on"
     when 1
-      s = 's'
+      s = "s"
       stats_long(location, s)
     else
       s = ""
@@ -393,7 +498,7 @@ class Monopoly
   end
   
   def stats_long(location, s)
-    word = "time#{s}"
+    word = "time" << s
     puts "Landed on #{location.landed_on} #{word}"
     puts "Current rent : $#{location.rent}"
     puts "Income : $#{location.income}"
@@ -405,16 +510,6 @@ class Monopoly
     else
       puts "Unowned"
     end
-  end
-  
-  def end_turn(game_on)
-    puts " End Turn ?"
-    answers  = ['y', 'q']
-    user = get_y_n(answers)
-    if user == 'q'
-      game_on = false
-    end
-    return game_on
   end
 
   def get_y_n(answers)
@@ -605,7 +700,12 @@ class Monopoly
       railroads.each do |r|
         index  += 1 if r.owner == location.owner
       end
-      puts "Railroads are monopolized!" if index == 4
+      if index == 4
+        puts "Railroads are monopolized!" 
+        railroads.each do |r|
+          r.monopolized = true
+        end
+      end
       railroads.each do |r|
         if r.owner    == location.owner
           r.multiplier = x[index]
@@ -808,5 +908,6 @@ class Monopoly
       go_to_jail(player)
     end
   end
+
   
 end
